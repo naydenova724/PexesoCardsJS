@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Pexeso game</title>    
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script src="jquery-3.3.1.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="css/PexesoCards.css"/>   
+    </head>
+<body>          
+    <div class="backgr">
+        <div class="startGame">
+            <input class="buttonStart buttonStartText" type="button" value="START GAME"/>
+        </div>
+        <div class="StartGamePressed">
+            <div class="PexesoCardsWrapBack">
+            
+            </div>
+            <div class="PexesoCardsWrap">
+   
+            </div>
+                         
+            <div class="PexesoTime">
+                <div class="PexesoTimePass"></div>
+            </div>
+            <div class="score">
+                <div class="scoreContent">
+                    <label>Score:
+                    <input class="scores" type="number" value="0"/>
+                    </label>
+                    <div>High score: 180</div>
+                </div>
+            </div>
+            <div id="reset">
+            </div>
+        </div>
+        <div class="Overlay">
+            <div class="GAME_OVER">GAME OVER</div>
+            <div class="Final_score">Final score: 180</div>
+            <div class="Button_BG">
+                <a href="Pexeso.html" class="TRY_AGAIN">Try again</a>
+            </div>
+        </div>
+        <div id="disableCards">
+            <div id="GameTimeOut">
+                <input class="TIMES_UP" type="button" value="Time's up! Try again?"/>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var planets = ['Venus.png', 'Venus.png', 'Uranus.png', 'Uranus.png', 'Saturn.png', 'Saturn.png', 'Mercury.png', 'Mars.png', 'Jupiter.png', 'Earth.png', 'Neptune.png', 'Pluto.png', 'Mercury.png', 'Mars.png', 'Jupiter.png', 'Earth.png', 'Neptune.png', 'Pluto.png'],
+            clicksArr=[],
+            positionArr=[],  
+            count = 0,
+            purple = document.querySelector('.PexesoTimePass'),
+            width = 1,
+            TimePass,
+            points = 0;
+            endGame = 0;                 
+
+        document.querySelector('.buttonStart').addEventListener("click", buttonStartPressed);
+        
+        function buttonStartPressed() {
+            
+            document.querySelector('.startGame').classList.add('hide');
+            document.querySelector('.StartGamePressed').classList.add('visible');
+            cardsAreActive(); 
+        }
+
+        function cardsAreActive () {
+            
+            var html_Pictures = '',
+                cardWrapperPic,
+                html_Backs = '',
+                cardWrapperBack,
+                points = 0;
+
+            clicksArr = [];
+            positionArr = [];
+            count = 0;
+            
+            planets.sort (function(a, b) {return 0.5 - Math.random()});
+            TimePass = setInterval(Timer, 1500);
+            
+            for (var i = 0; i < planets.length; i++){
+              
+                html_Pictures = '<img src="pictures/Planets/' + planets[i] + '"/>';
+                
+                cardWrapperPic = document.createElement('div');
+                cardWrapperPic.classList.add('cardsPositionHidden');
+                cardWrapperPic.setAttribute("id", i);
+                cardWrapperPic.innerHTML = html_Pictures;
+            
+                document.querySelector('.PexesoCardsWrap')
+                        .appendChild(cardWrapperPic);
+
+
+                html_Backs = '<img src="pictures/Hover.png"/>';
+                
+                cardWrapperBack = document.createElement('div');
+                cardWrapperBack.classList.add('cardsPosition');
+                cardWrapperBack.setAttribute("data-id", i);
+                cardWrapperBack.innerHTML = html_Backs;
+            
+                document.querySelector('.PexesoCardsWrapBack')
+                        .appendChild(cardWrapperBack);
+            };  
+        };
+
+
+        document.querySelector('.PexesoCardsWrapBack').addEventListener("click", aCardIsPressed);
+         
+        function aCardIsPressed(event) {            
+            cardId = event.target.parentNode.getAttribute('data-id');
+            positionArr.push(cardId);    
+            imagE = document.getElementById(cardId).innerHTML;
+           
+            event.target.parentNode.innerHTML = imagE;
+             
+            clicksArr.push(planets[cardId]);       
+
+            if (count === 1 ){
+                console.log(clicksArr);
+ 
+                if(clicksArr[0] === clicksArr[1]) {
+                    console.log('equal');
+                    
+                    points = points + 20;
+                    document.querySelector('.scores').value = points;
+                    
+                    endGame = endGame + 1;
+                    var seeEqualCards = setTimeout(EqualCards, 500);
+                    function EqualCards() {
+                        document.getElementById(positionArr[0]).style.opacity = "0"; 
+                        document.querySelector('[data-id="' + positionArr[0] + '"]').style.opacity = '0';  
+                        document.getElementById(positionArr[1]).style.opacity = "0"; 
+                        document.querySelector('[data-id="' + positionArr[1] + '"]').style.opacity = '0';  
+                    };
+                    if(endGame === 9){
+                        document.querySelector('.Overlay').style.display= "block";
+                        clearInterval(TimePass);
+                    };
+                };              
+            };
+            
+            
+            if (count === 2 ){
+                console.log(positionArr);   
+                
+                document.querySelector('[data-id="' + positionArr[0] + '"]').innerHTML = '<img src="pictures/Hover.png"/>';
+                document.querySelector('[data-id="' + positionArr[1] + '"]').innerHTML = '<img src="pictures/Hover.png"/>';
+                
+                count=0;     
+                clicksArr=[];
+                clicksArr.push(planets[cardId]);
+                positionArr.splice(0,2);    
+            };
+
+            count ++;  
+        };
+
+        function Timer() {
+                if (width == 100) {
+                    document.getElementById('GameTimeOut').style.display = "block";
+                    document.querySelector('.TIMES_UP').style.display = "block";
+                    cardsAreStill();
+                } else {
+                    width++; 
+                    purple.style.width = width + '%'; 
+                }
+        };   
+
+        document.querySelector('.TIMES_UP').addEventListener('click', resetGame);
+
+        document.getElementById('reset').addEventListener('click', newGame);
+
+        
+
+        function resetGame() {
+            document.getElementById('disableCards').style.display = "none";
+            document.getElementById('GameTimeOut').style.display = "none";
+            document.querySelector('.TIMES_UP').style.display = "none"; 
+            clearInterval(TimePass);
+            newGame();
+        };
+
+        function newGame() {
+            document.querySelector('.PexesoCardsWrapBack').innerHTML = "";
+            document.querySelector('.PexesoCardsWrap').innerHTML = "";
+            width = 1;
+            points = 0;
+            document.querySelector('.scores').value = points;
+            cardsAreActive ();   
+        };
+
+        function cardsAreStill() {
+            clearInterval(TimePass);
+            width = 1;
+            document.getElementById('disableCards').style.display = "block";
+        };
+
+    </script>
+
+</body>
+</html>
